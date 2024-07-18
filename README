@@ -1,0 +1,223 @@
+---
+# Projeto de Loja com Carrinho de Compras
+
+## Descrição
+
+Este projeto em Java implementa uma loja com um carrinho de compras, utilizando o padrão de projeto Memento para permitir a adição, remoção e desfazer/redo de itens do carrinho.
+
+## Estrutura do Projeto
+
+O projeto é composto pelas seguintes classes:
+
+1. Caretaker
+2. CarrinhoMemento
+3. Main
+4. Originator
+5. Produto
+
+## Padrão Memento
+
+- O que é o Padrão Memento?
+
+O padrão Memento é um padrão de design comportamental que permite capturar e externalizar o estado interno de um objeto sem violar o encapsulamento, de modo que o objeto possa ser restaurado a este estado posteriormente.
+
+- Como o Padrão Memento é implementado no projeto?
+
+No projeto, o padrão Memento é usado para gerenciar o estado do carrinho de compras, permitindo desfazer (undo) e refazer (redo) operações. A implementação envolve três componentes principais:
+
+1. Originator: O objeto cujo estado precisa ser salvo e restaurado.
+2. Memento: O objeto que armazena o estado interno do Originator.
+3. Caretaker: O responsável por solicitar a criação de Mementos e restaurar o estado do Originator.
+
+- Relacionamento das Classes
+
+Produto.java:
+
+public class Produto {
+    private String nome;
+    private double preco;
+    private int estoque;
+    private int qnt;
+    private int codigo;
+
+    // Construtor, getters e setters
+
+    public int comprarProduto(int x) {
+        x = x + qnt;
+        return x;
+    }
+
+    public int alterarQnt(int n) {
+        if (n > 0 && n <= estoque) {
+            return n;
+        } else {
+            return 0;
+        }
+    }
+
+    public String imprimeDados() {
+        return codigo + ". " + "  |  Nome: " + nome + "  |  Preco: R$" + preco + " reais  |  Estoque: " + estoque + "\\n";
+    }
+
+    public String carrinhoDados() {
+        return "Codigo do Produto: " + codigo + "  |  Nome: " + nome + "  |  Preco: R$" + preco * qnt + " reais  |  Quantidade: " + qnt + "\\n";
+    }
+
+    // Getters e Setters...
+}
+
+A classe Produto representa os produtos da loja, contendo informações como nome, preço, estoque, quantidade no carrinho e código do produto. Ela também possui métodos para alterar a quantidade no carrinho e imprimir os dados dos produtos.
+
+CarrinhoMemento.java:
+
+public class CarrinhoMemento {
+    private Produto[] produtos;
+
+    public CarrinhoMemento(Produto[] produtos) {
+        this.produtos = new Produto[produtos.length];
+        for (int i = 0; i < produtos.length; i++) {
+            this.produtos[i] = new Produto(produtos[i].getCodigo(), produtos[i].getNome(), produtos[i].getPreco(), produtos[i].getEstoque(), produtos[i].getQnt());
+        }
+    }
+
+    public Produto[] getProdutos() {
+        return produtos;
+    }
+}
+
+A classe "CarrinhoMemento" armazena o estado interno do carrinho de compras (o estado dos produtos). Ela cria uma cópia profunda do array de produtos para garantir que as mudanças nos produtos não afetem o Memento salvo.
+
+Originator.java:
+
+public class Originator {
+    private Produto[] produtos;
+
+    public Originator(Produto[] produtos) {
+        this.produtos = produtos;
+    }
+
+    public void setProdutos(Produto[] produtos) {
+        this.produtos = produtos;
+    }
+
+    public Produto[] getProdutos() {
+        return produtos;
+    }
+
+    public CarrinhoMemento save() {
+        return new CarrinhoMemento(produtos);
+    }
+
+    public void restore(CarrinhoMemento memento) {
+        produtos = memento.getProdutos();
+    }
+}
+
+A classe "Originator" é responsável por criar Mementos e restaurar seu estado a partir de um Memento. O estado do Originator é representado pelo array de produtos.
+
+Caretaker.java:
+
+import java.util.Stack;
+
+public class Caretaker {
+    private Stack<CarrinhoMemento> mementoStack = new Stack<>();
+
+    public void saveState(Produto[] produtos) {
+        mementoStack.push(new CarrinhoMemento(produtos));
+    }
+
+    public CarrinhoMemento restoreState() {
+        if (!mementoStack.isEmpty()) {
+            return mementoStack.pop();
+        }
+        return null;
+    }
+}
+
+A classe "Caretaker" gerencia os Mementos. Ela usa uma pilha (Stack) para armazenar os estados anteriores do carrinho de compras e permite restaurar o estado anterior, implementando a funcionalidade de desfazer (undo).
+
+Main.java:
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Produto produtos[] = new Produto[3];
+        produtos[0] = new Produto(1, "001", 11.99, 1001, 0);
+        produtos[1] = new Produto(2, "002", 19.99, 1002, 0);
+        produtos[2] = new Produto(3, "003", 29.99, 1003, 0);
+
+        Originator originator = new Originator(produtos);
+        Caretaker caretaker = new Caretaker();
+        caretaker.saveState(produtos); // Salvar estado inicial
+
+        int n = 0, qnt = 0, fim = 0;
+
+        while (fim != -1) {
+            n = 0;
+            System.out.println("Carrinho de compras:");
+            for (int i = 0; i < 3; i++) {
+                if (produtos[i].getQnt() > 0) {
+                    System.out.println(produtos[i].carrinhoDados());
+                    n++;
+                }
+            }
+            if (n == 0) {
+                System.out.println("Sem itens.");
+            }
+            System.out.println("\\nPara vizualizar a loja, digite 0.\\nPara remover um produto do carrinho ou alterar sua quantidade, digite seu codigo\\nPara desfazer a última operação, digite 9\\nPara finalizar o carrinho, digite -1");
+            fim = sc.nextInt();
+            if (fim == 0) {
+                n = 0;
+                while (n != -1) {
+                    System.out.println("Lista de produtos a venda: ");
+                    for (int qtdAtual = 0; qtdAtual < 3; qtdAtual++) {
+                        System.out.println(produtos[qtdAtual].imprimeDados());
+                    }
+                    System.out.println("Digite -1 para vizualizar o carrinho de compras ou, para adicionar algum produto ao carrinho de compras, digite seu numero: ");
+                    n = sc.nextInt();
+                    if (n > 0 && n <= 3) {
+                        System.out.println("Selecione a quantidade (MAX: " + produtos[n - 1].getEstoque() + "):");
+                        qnt = sc.nextInt();
+                        if (qnt > 0 && qnt + produtos[n - 1].getQnt() <= produtos[n - 1].getEstoque()) {
+                            caretaker.saveState(produtos); // Salvar estado antes de modificar
+                            produtos[n - 1].setQnt(produtos[n - 1].comprarProduto(qnt));
+                        }
+                    }
+                }
+            }
+            if (fim > 0 && fim <= 3) {
+                System.out.println("Digite 0 para remover ou digite a nova quantidade (qualquer valor negativo ou acima do estoque (" + produtos[fim - 1].getEstoque() + ") vai zerar a quantidade):");
+                n = sc.nextInt();
+                caretaker.saveState(produtos); // Salvar estado antes de modificar
+                produtos[fim - 1].setQnt(produtos[fim - 1].alterarQnt(n));
+            }
+            if (fim == 9) { // Desfazer a última operação
+                CarrinhoMemento memento = caretaker.restoreState();
+                if (memento != null) {
+                    originator.restore(memento);
+                    produtos = originator.getProdutos();
+                    System.out.println("Última operação desfeita.");
+                } else {
+                    System.out.println("Não há operações para desfazer.");
+                }
+            }
+        }
+
+        System.out.println("\\n CARRINHO FINALIZADO!\\n");
+        for (int i = 0; i < 3; i++) {
+            if (produtos[i].getQnt() > 0) {
+                System.out.println(produtos[i].carrinhoDados());
+            }
+        }
+    }
+}
+
+A classe "Main" é o ponto de entrada do programa. Ela inicializa os produtos, o Originator e o Caretaker. O loop principal permite ao usuário adicionar, remover produtos do carrinho, visualizar a loja e desfazer operações. As operações de salvar e restaurar estados são gerenciadas pelo Caretaker.
+
+## Conclusão
+
+O padrão Memento foi utilizado para permitir que o usuário desfizesse as operações no carrinho de compras. Através das classes "Originator", "Caretaker"
+e "CarrinhoMemento", o estado do carrinho é salvo e restaurado, permitindo uma experiência de usuário mais robusta e segura.
+---
