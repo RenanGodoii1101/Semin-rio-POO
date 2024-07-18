@@ -27,11 +27,11 @@ public class Produto {
     }
 
     public String imprimeDados() {
-        return codigo + ". " + "    Nome: " + nome + "    Preco: " + preco + " reais    Estoque: " + estoque + "\n";
+        return codigo + ". " + "  |  Nome: " + nome + "  |  Preco: R$" + preco + " reais  |  Estoque: " + estoque + "\n";
     }
 
     public String carrinhoDados() {
-        return "Codigo do Produto: " + codigo + "    Nome: " + nome + "    Preco: " + preco * qnt + " reais    Quantidade: " + qnt + "\n";
+        return "Codigo do Produto: " + codigo + "  |  Nome: " + nome + "  |  Preco: R$" + preco * qnt + " reais  |  Quantidade: " + qnt + "\n";
     }
 
     // Getters and Setters
