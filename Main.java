@@ -7,14 +7,14 @@ public class Main {
         produtos[0] = new Produto(1, "001", 11.99, 1001, 0);
         produtos[1] = new Produto(2, "002", 19.99, 1002, 0);
         produtos[2] = new Produto(3, "003", 29.99, 1003, 0);
-        
+
         Originator originator = new Originator(produtos);
         Caretaker caretaker = new Caretaker();
         caretaker.saveState(produtos); // Salvar estado inicial
-        
+
         int n = 0, qnt = 0, fim = 0;
-        
-        while (fim >= 0) {
+
+        while (fim != -1) {
             n = 0;
             System.out.println("Carrinho de compras:");
             for (int i = 0; i < 3; i++) {
@@ -31,7 +31,7 @@ public class Main {
             if (fim == 0) {
                 n = 0;
                 while (n != -1) {
-                    System.out.println("\nLista de produtos a venda: ");
+                    System.out.println("Lista de produtos a venda: ");
                     for (int qtdAtual = 0; qtdAtual < 3; qtdAtual++) {
                         System.out.println(produtos[qtdAtual].imprimeDados());
                     }
@@ -46,12 +46,14 @@ public class Main {
                         }
                     }
                 }
-            }else if (fim > 0 && fim <= 3) {
+            }
+            if (fim > 0 && fim <= 3) {
                 System.out.println("Digite 0 para remover ou digite a nova quantidade (qualquer valor negativo ou acima do estoque (" + produtos[fim - 1].getEstoque() + ") vai zerar a quantidade):");
                 n = sc.nextInt();
                 caretaker.saveState(produtos); // Salvar estado antes de modificar
                 produtos[fim - 1].setQnt(produtos[fim - 1].alterarQnt(n));
-            }else if (fim == 9) { // Desfazer a última operação
+            }
+            if (fim == 9) { // Desfazer a última operação
                 CarrinhoMemento memento = caretaker.restoreState();
                 if (memento != null) {
                     originator.restore(memento);
@@ -60,10 +62,6 @@ public class Main {
                 } else {
                     System.out.println("Não há operações para desfazer.");
                 }
-            }else if (fim < 0){
-                break;
-            }else {
-                System.out.println("Opção inválida!");
             }
         }
 
